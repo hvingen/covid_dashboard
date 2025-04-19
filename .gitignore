@@ -2,6 +2,5 @@ __pycache__/
 .ipynb_checkpoints/
 .DS_Store
 *.log
+*.gpkg
 *.zip
-notebooks/exports/
-data/shapefiles/
