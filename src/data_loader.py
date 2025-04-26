@@ -8,7 +8,6 @@ class Dataframes:
         file2 = CSV_DIR / 'COVID-19_aantallen_gemeente_per_dag_tm_03102021.csv'
         file3 = CSV_DIR / 'COVID-19_ziekenhuisopnames.csv'
         file4 = CSV_DIR / 'COVID-19_ziekenhuisopnames_tm_03102021.csv'
-
         try:
             self.aantallen_gemeente_df1 = pd.read_csv(file1, sep=';')
             self.aantallen_gemeente_df2 = pd.read_csv(file2, sep=';')
@@ -16,7 +15,6 @@ class Dataframes:
             self.ziekenhuisopnames_df2 = pd.read_csv(file4, sep=';')
         except Exception:
             self.aantallen_gemeente_df1 = None
-
         self.merged_clean_dataset = self.prepare_merged_dataset()
 
     def prepare_merged_dataset(self) -> pd.DataFrame:
@@ -32,7 +30,6 @@ class Dataframes:
 
     def get_merged_and_clean_dataset(self) -> pd.DataFrame:
         return self.merged_clean_dataset
-
 
 def load_province_shapefile():
     shapefile_path = SHAPEFILES_DIR / "B1_Provinciegrenzen_van_NederlandPolygon.shp"
