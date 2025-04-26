@@ -1,15 +1,16 @@
 import os
+from config import EXPORTS_DIR
 from datetime import datetime
 import pandas as pd
 
-EXPORT_DIR = os.path.join(os.getcwd(), "exports")
-os.makedirs(EXPORT_DIR, exist_ok=True)
+EXPORTS_DIR = os.path.join(os.getcwd(), "/notebooks/exports")
+os.makedirs(EXPORTS_DIR, exist_ok=True)
 
 def export_dataframe(df, format="csv", name="export", full=False):
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     suffix = "full" if full else "small"
     filename = f"{name}_{suffix}_{timestamp}.{format}"
-    filepath = os.path.join(EXPORT_DIR, filename)
+    filepath = os.path.join(EXPORTS_DIR, filename)
 
     if format == "csv":
         df.to_csv(filepath, index=False)
