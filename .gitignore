@@ -3,5 +3,4 @@ __pycache__/
 .DS_Store
 *.log
 *.zip
-/notebooks/GPKG_skeleton_layers_sampled_v1.ipynb
 /data/shapefiles/wijkenbuurten_2024_v1.gpkg
