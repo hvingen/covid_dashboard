@@ -3,6 +3,7 @@ TODO: Add module-level description here.
 """
 
 import pandas as pd
+from config import SRC_DIR, CSV_DIR
 
 date_pattern1 = r'(?:^\d{2}-0[1-9]|1[0-2])-\d{4}$'  # DD-MM-YYYY pattern
 date_pattern2 = r'(?:^\d{4}-0[1-9]|1[0-2])-\d{2}$'  # YYYY-MM-DD pattern
@@ -47,7 +48,6 @@ def determine_date_format_date_of_statistics(dataframes: object) -> str:
 
 
 def clean_dataframe_aantallen_gemeente(dataframes: object):
-    """TODO: Beschrijf deze functie."""
     """
     This function cleans the dataframe for aantallen_gemeente
     - adds mew column in a date types using a previously determined date format
@@ -68,7 +68,6 @@ def clean_dataframe_aantallen_gemeente(dataframes: object):
 
 
 def clean_dataframe_ziekenhuisopnames(dataframes: object):
-    """TODO: Beschrijf deze functie."""
     """
     Adds mew column in both dataframes ziekenhuisopnames in a date type using a previously determined date format
     :param an instance of the Class DataFrames : dataframes
@@ -82,10 +81,9 @@ def clean_dataframe_ziekenhuisopnames(dataframes: object):
 
 
 def add_columns_clean_merged_dataframe(dataframes: object):
-    """TODO: Beschrijf deze functie."""
     """
     This method ads new columns to the merged_clean_dataset in order to enable better grouping of data for the covid dashboard
-    :param an instance of the Class DataFrames : dataframes
+    :param an instance of the Class Riool : dataframes
     """
     #create new columns for grouping the data on less columns and to ensure that the columns always have a value from one of the two original dataframes
     dataframes.merged_clean_dataset['Municipality_name_merged'] = dataframes.merged_clean_dataset['Municipality_name'].fillna(dataframes.merged_clean_dataset['Municipality_name_x'])
@@ -106,3 +104,4 @@ def remove_non_required_columns(clean_merged_dataset: object) -> object:
     selected_cols = ['Total_reported', 'Deceased', 'Hospital_admission', 'Municipality_name_merged', 'Province_merged', 'Year', 'Month', 'Month_name']
     clean_small_merged_dataset = clean_merged_dataset[selected_cols]
     return clean_small_merged_dataset
+

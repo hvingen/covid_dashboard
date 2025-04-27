@@ -9,7 +9,6 @@ import dataframe_combiner
 from data_loader import load_province_shapefile
 
 from data_loader import load_municipality_shapefile
-# from data_service import get_prepared_covid_dataset
 
 write_dataset_to_csv_file = False
 remove_non_required_data = True
@@ -60,9 +59,27 @@ def get_prepared_covid_dataset() -> pd.DataFrame:
 
     return dfs.merged_clean_dataset
 
+def get_prepared_riool_dataset() -> pd.DataFrame:
+    """
+    Creates data set to be used in order to be able to create riool dashboard
+    The data service will call the functions to:
+    - Read data to be used for dashboards and create data frames
+    - Clean the data in the data frames
+    - Combine the dataframes to new dataframe
+    - Conditionally removes the not required columns
+    - Conditionally writes the data of the dataframe to a csv file
+    :param :
+    :return: a pandas dataframe with cleaned and merged data
+    """
+    dfs_riool = data_loader.Riool()
+
+    dfs_riool.aantallen_riool['Year'] = dfs_riool.aantallen_riool['Date_measurement'].dt.to_period('Y').astype(str)  # format YYYY
+    dfs_riool.aantallen_riool['Month'] = dfs_riool.aantallen_riool['Date_measurement'].dt.month.astype(int)
+    dfs_riool.aantallen_riool['Month_name'] = dfs_riool.aantallen_riool['Date_measurement'].dt.month_name().astype(str)
+
+    return dfs_riool
 
 def get_province_heatmap_data(year):
-    """TODO: Beschrijf deze functie."""
     """
     Combineer provinciegrenzen met COVID-data per provincie voor een gegeven jaar.
     """
@@ -75,7 +92,6 @@ def get_province_heatmap_data(year):
     return merged
 
 def get_municipality_heatmap_data(year):
-    """TODO: Beschrijf deze functie."""
     """
     Combineert gemeentegrenzen met COVID-data voor een gegeven jaar.
     """
@@ -102,9 +118,36 @@ def get_municipality_heatmap_data(year):
     
     return merged
 
+def get_province_heatmap_riool_data(year):
+    """
+    Combineer provinciegrenzen met COVID-data per provincie voor een gegeven jaar.
+    """
+    df = get_prepared_riool_dataset()
+    df_year = df.aantallen_riool[df.aantallen_riool['Year'] == year]
+    df_year = df_year.rename(columns={'RWZI_AWZI_name': 'Gemeentenaam'})
+    df_prov = df.gemeenten_per_provincie
+    merged_df = pd.merge(df_year, df_prov, on='Gemeentenaam', how='inner')
+
+    gdf = load_province_shapefile()
+    df_grouped = merged_df.groupby('Provincie')[['RNA_flow_per_100000']].sum().reset_index()
+    gdf = gdf.rename(columns={'PROV_NAAM': 'Provincie'})
+    merged = gdf.merge(df_grouped, on='Provincie', how='left')
+    return merged
+
+def get_municipality_heatmap_riool_data(year):
+    """
+    Combineert gemeentegrenzen met COVID-data voor een gegeven jaar.
+    """
+    gdf = load_municipality_shapefile()
+    df = get_prepared_riool_dataset()
+    df_year = df.aantallen_riool[df.aantallen_riool['Year'] == year]
+    df_grouped = df_year.groupby('RWZI_AWZI_name')[['RNA_flow_per_100000']].sum().reset_index()
+    gdf = gdf.rename(columns={'gemeentenaam': 'RWZI_AWZI_name'})
+    merged = gdf.merge(df_grouped, on='RWZI_AWZI_name', how='left')
+    return merged
+
 
 def get_metric_mapping():
-    """TODO: Beschrijf deze functie."""
     return {
     'Total reported': 'Total_reported',
     'Hospital admission': 'Hospital_admission',
@@ -113,5 +156,4 @@ def get_metric_mapping():
 
 
 def get_available_years(df):
-    """TODO: Beschrijf deze functie."""
     return df['Year'].dropna().sort_values().unique().tolist()
