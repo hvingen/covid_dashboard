@@ -34,3 +34,4 @@ def combine_dataframes(dataframes: object) -> pd.DataFrame:
     merged_clean_dataset = new_aantallen_gemeente_df.merge(merged_ziekenhuisopnames_df, left_on=['join_column'], right_on=['join_column'], how='outer')
 
     return merged_clean_dataset
+
