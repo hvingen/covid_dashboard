@@ -138,7 +138,74 @@ def update_plot(df, year, total_reported, hospital_admission, deceased, province
     plt.tight_layout()
     plt.show()
 
-def plot_province_heatmap(gdf, column='Total_reported'):
+# Nieuwe defenitie Shapely
+def plot_province_heatmap(gdf, column):
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(1, 1, figsize=(8, 10))
+
+    if gdf.geom_type.isin(['MultiPolygon']).any():
+        gdf = gdf.explode()
+        gdf.reset_index(drop=True, inplace=True)
+        
+    xlim = gdf.total_bounds[[0, 2]]
+    ylim = gdf.total_bounds[[1, 3]]
+
+    gdf.plot(
+        column=column,
+        cmap='OrRd',
+        linewidth=0.5,
+        ax=ax,
+        edgecolor='0.8',
+        legend=True,
+        legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
+        missing_kwds={"color": "lightgrey", "label": "No data"}
+    )
+    ax.set_xlim(xlim)
+    ax.set_ylim(ylim)
+    ax.axis('off')
+    plt.show()
+
+
+# def plot_province_heatmap(gdf, column='Total_reported'):
+#     """
+#     TODO: Describe what this function does.
+#     """
+#     import matplotlib.pyplot as plt
+
+#     fig, ax = plt.subplots()
+#     fig.set_size_inches(6, 6)
+
+#     xlim = gdf.total_bounds[[0, 2]]
+#     ylim = gdf.total_bounds[[1, 3]]
+
+#     gdf.plot(
+#         column=column,
+#         cmap='OrRd',
+#         linewidth=0.5,
+#         ax=ax,
+#         edgecolor='0.8',
+#         legend=True,
+#         legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
+#         missing_kwds={"color": "lightgrey", "label": "No data"}
+#     )
+#     ax.set_xlim(xlim)
+#     ax.set_ylim(ylim)
+#     ax.set_aspect('equal')
+#     ax.axis('off')
+#     for spine in ax.spines.values():
+#         spine.set_visible(False)
+
+#     leg = ax.get_legend()
+#     if leg:
+#         leg.set_bbox_to_anchor((1.02, 1))
+#         leg.set_title(column)
+
+#     plt.subplots_adjust(left=0.01, right=0.85)
+#     plt.tight_layout()
+#     plt.show()
+
+
+def plot_municipality_heatmap(gdf, column='Total_reported'):
     """
     TODO: Describe what this function does.
     """
@@ -169,12 +236,12 @@ def plot_province_heatmap(gdf, column='Total_reported'):
 
     leg = ax.get_legend()
     if leg:
-        leg.set_bbox_to_anchor((1.02, 1))
         leg.set_title(column)
 
     plt.subplots_adjust(left=0.01, right=0.85)
     plt.tight_layout()
     plt.show()
+
 
 def plot_province_heatmap_riool(gdf, column='RNA_flow_per_100000'):
     """
