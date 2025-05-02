@@ -1,18 +1,16 @@
 """
 TODO: Add module-level description here.
 """
-
 import pandas as pd
 import data_loader
 import dataframe_cleaner
 import dataframe_combiner
-from data_loader import load_province_shapefile
 
+from data_loader import load_province_shapefile
 from data_loader import load_municipality_shapefile
 
 write_dataset_to_csv_file = False
 remove_non_required_data = True
-
 
 def get_prepared_covid_dataset() -> pd.DataFrame:
     """
@@ -146,14 +144,12 @@ def get_municipality_heatmap_riool_data(year):
     merged = gdf.merge(df_grouped, on='RWZI_AWZI_name', how='left')
     return merged
 
-
 def get_metric_mapping():
     return {
     'Total reported': 'Total_reported',
     'Hospital admission': 'Hospital_admission',
     'Deceased': 'Deceased'
     }
-
 
 def get_available_years(df):
     return df['Year'].dropna().sort_values().unique().tolist()
