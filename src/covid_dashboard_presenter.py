@@ -12,6 +12,7 @@ from config import SHAPEFILES_DIR
 import matplotlib.pyplot as plt
 import numpy as np
 
+# Plot Tab 1
 def plot_covid(df, year, total_reported, hospital_admission, deceased, province, municipalities, months):
     # Filter by year
     filtered_df = df[df['Year'] == year]
@@ -87,6 +88,7 @@ def plot_covid(df, year, total_reported, hospital_admission, deceased, province,
     plt.tight_layout()
     plt.show()
 
+# Plot Tab2 en Tab3
 def plot_heatmap(gdf, column, title, cmap='OrRd', legend=True, edgecolor='0.8'):
     ax = gdf.plot(
         column=column,
