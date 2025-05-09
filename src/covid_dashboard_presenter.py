@@ -88,7 +88,7 @@ def plot_covid(df, year, total_reported, hospital_admission, deceased, province,
     plt.tight_layout()
     plt.show()
 
-# Plot Tab2 en Tab3
+# Plot Tab2, Tab3
 def plot_heatmap(gdf, column, title, cmap='OrRd', legend=True, edgecolor='0.8'):
     ax = gdf.plot(
         column=column,
