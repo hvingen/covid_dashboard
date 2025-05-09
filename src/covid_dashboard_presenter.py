@@ -1,63 +1,18 @@
-#%matplotlib inline
-"""
-TODO: Add module-level description here.
-"""
+import sys
+from pathlib import Path
+
+# Dynamisch projectpad instellen zodat config gevonden wordt
+project_root = Path(__file__).resolve()
+while not (project_root / "config.py").exists() and project_root != project_root.parent:
+    project_root = project_root.parent
+
+sys.path.insert(0, str(project_root))
+
 from config import SHAPEFILES_DIR
 import matplotlib.pyplot as plt
-import pandas as pd_riool
-import geopandas as gpd
-from pathlib import Path
-import ipywidgets as widgets
-import seaborn as sns
 import numpy as np
 
-def update_heatmap_riool(year):
-    from pathlib import Path
-    import pandas as pd
-    from data_loader import load_province_shapefile
-
-    csv_directory = Path(__file__).resolve().parent.parent / 'data' / 'csv'
-    file5 = csv_directory / 'COVID-19_rioolwaterdata.csv'
-
-    df_inkomen = pd.read_csv(file5, sep=';')
-
-    gdf_prov = load_province_shapefile()
-
-    # Gebruik gemiddelde RNA-waarde als tijdelijke placeholder
-    mean_rna = df_inkomen['RNA_flow_per_100000'].mean()
-    gdf_prov['RNA_flow_per_100000'] = mean_rna
-    columns = 'RNA_flow_per_100000'
-
-    ax = gdf_prov.plot(
-        column=columns,
-        legend=True,
-        figsize=(10, 8),
-        edgecolor='black'
-    )
-    ax.set_title(f'Gemiddelde RNA/100.000 in rioolwater ({year})')
-    ax.axis('off')
-    columns = 'RNA_flow_per_100000'
-    column = columns,
-    cmap = 'OrRd',
-    legend = True,
-    edgecolor = 'black'
-    ax.set_title("Corona besmetting in rioolwater", fontsize=15, fontweight='bold')
-    ax.set_axis_off()
-
-    # arrow
-    x, y, arrowlenght = 0, 0, 0.2
-    angle = 90
-    dx = arrowlenght * np.cos(np.radians(angle))
-    dy = arrowlenght * np.sin(np.radians(angle))
-
-    ax.annotate('N', xy=(x, y), xytext=(x - dx, y - dy),
-                  arrowprops=dict(facecolor='black', width=5, headwidth=15),
-                  ha='center', va='center', fontsize=20,
-                  xycoords=ax.transAxes)
-
-    plt.show()
-
-def update_plot(df, year, total_reported, hospital_admission, deceased, province, municipalities, months):
+def plot_covid(df, year, total_reported, hospital_admission, deceased, province, municipalities, months):
     # Filter by year
     filtered_df = df[df['Year'] == year]
 
@@ -132,102 +87,41 @@ def update_plot(df, year, total_reported, hospital_admission, deceased, province
     plt.tight_layout()
     plt.show()
 
+def plot_heatmap(gdf, column, title, cmap='OrRd', legend=True, edgecolor='0.8'):
+    ax = gdf.plot(
+        column=column,
+        cmap=cmap,
+        edgecolor=edgecolor,
+        figsize=(10, 8),
+        linewidth=0.5,
+        legend=legend,
+        legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
+        missing_kwds={"color": "lightgrey", "label": "No data"}
+    )
+    ax.set_title(title, fontsize=15, fontweight='bold')
+    ax.set_axis_off()
+
+    # Noordpijl
+    x, y, arrowlength = 0, 0, 0.2
+    angle = 90
+    dx = arrowlength * np.cos(np.radians(angle))
+    dy = arrowlength * np.sin(np.radians(angle))
+
+    ax.annotate('N', xy=(x, y), xytext=(x - dx, y - dy),
+                arrowprops=dict(facecolor='black', width=5, headwidth=15),
+                ha='center', va='center', fontsize=20,
+                xycoords=ax.transAxes)
+
+    plt.show()
 
 def plot_province_heatmap(gdf, column):
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-    if gdf.geom_type.isin(['MultiPolygon']).any():
-        gdf = gdf.explode()
-        gdf.reset_index(drop=True, inplace=True)
-    xlim = gdf.total_bounds[[0, 2]]
-    ylim = gdf.total_bounds[[1, 3]]
-    gdf.plot(
-        column=column,
-        cmap='OrRd',
-        linewidth=0.5,
-        ax=ax,
-        edgecolor='0.8',
-        legend=True,
-        legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
-        missing_kwds={"color": "lightgrey", "label": "No data"}
-    )
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.axis('off')
-    plt.show()
+    plot_heatmap(gdf, column=column, title="Besmetting per provincie")
 
+def plot_municipality_heatmap(gdf, column):
+    plot_heatmap(gdf, column=column, title="Besmetting per gemeente")
 
-def plot_municipality_heatmap(gdf, column='Total_reported'):
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-    if gdf.geom_type.isin(['MultiPolygon']).any():
-        gdf = gdf.explode()
-        gdf.reset_index(drop=True, inplace=True)
-    xlim = gdf.total_bounds[[0, 2]]
-    ylim = gdf.total_bounds[[1, 3]]
-    gdf.plot(
-        column=column,
-        cmap='OrRd',
-        linewidth=0.5,
-        ax=ax,
-        edgecolor='0.8',
-        legend=True,
-        legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
-        missing_kwds={"color": "lightgrey", "label": "No data"}
-    )
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.axis('off')
-    plt.show()
+def plot_province_heatmap_riool(gdf, column):
+    plot_heatmap(gdf, column=column, title="Rioolwater per provincie")
 
-
-def plot_province_heatmap_riool(gdf, column='RNA_flow_per_100000'):
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-    if gdf.geom_type.isin(['MultiPolygon']).any():
-        gdf = gdf.explode()
-        gdf.reset_index(drop=True, inplace=True)
-    xlim = gdf.total_bounds[[0, 2]]
-    ylim = gdf.total_bounds[[1, 3]]
-    gdf.plot(
-        column=column,
-        cmap='OrRd',
-        linewidth=0.5,
-        ax=ax,
-        edgecolor='0.8',
-        legend=True,
-        legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
-        missing_kwds={"color": "lightgrey", "label": "No data"}
-    )
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.axis('off')
-    plt.show()
-
-
-def plot_municipality_heatmap_riool(gdf, column='RNA_flow_per_100000'):
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(1, 1, figsize=(6, 6))
-    if gdf.geom_type.isin(['MultiPolygon']).any():
-        gdf = gdf.explode()
-        gdf.reset_index(drop=True, inplace=True)
-    xlim = gdf.total_bounds[[0, 2]]
-    ylim = gdf.total_bounds[[1, 3]]
-    gdf.plot(
-        column=column,
-        cmap='OrRd',
-        linewidth=0.5,
-        ax=ax,
-        edgecolor='0.8',
-        legend=True,
-        legend_kwds={'label': column.replace('_', ' '), 'orientation': 'vertical'},
-        missing_kwds={"color": "lightgrey", "label": "No data"}
-    )
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
-    ax.axis('off')
-    plt.show()
-
-
-
-
+def plot_municipality_heatmap_riool(gdf, column):
+    plot_heatmap(gdf, column=column, title="Rioolwater per gemeente")
